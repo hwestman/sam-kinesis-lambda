@@ -1,0 +1,111 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Sam HandleKinesisRecord local event",
+            "type": "aws-sam",
+            "request": "direct-invoke",
+            "invokeTarget": {
+                "target": "code",
+                "architecture": "arm64",
+                "projectRoot": "${workspaceFolder}/src/KinesisTestConsumer",
+                "lambdaHandler": "KinesisTestConsumer::KinesisTestConsumer.Function::HandleKinesisRecord"
+            },
+            "lambda": {
+                "runtime": "dotnet6",
+                "payload": {
+                    "path": "${workspaceFolder}/events/kinesis-1.json"
+                },
+                "environmentVariables": {
+                    "EnvironmentName": "test1"
+                }
+            },
+            "aws": {
+                "region": "eu-west-1",
+                "credentials":"profile:default"
+            }
+        },
+        {
+            "name": "Sam put",
+            "type": "aws-sam",
+            "request": "direct-invoke",
+            "invokeTarget": {
+                "target": "code",
+                "projectRoot": "${workspaceFolder}/src/KinesisTestConsumer",
+                "lambdaHandler": "KinesisTestConsumer::KinesisTestConsumer.Function::FunctionHandler"
+            },
+            "lambda": {
+                "runtime": "dotnet6",
+                "payload": {},
+                "environmentVariables": {
+                    "EnvironmentName": "test1"
+                }
+            },
+            "aws": {
+                "region": "eu-west-1",
+                "credentials":"profile:default"
+            }
+        },
+        {
+            "name": "Sam consume",
+            "type": "aws-sam",
+            "request": "direct-invoke",
+            "invokeTarget": {
+                "target": "code",
+                "projectRoot": "${workspaceFolder}/src/KinesisTestConsumer",
+                "lambdaHandler": "KinesisTestConsumer::KinesisTestConsumer.Function::Consume"
+            },
+            "lambda": {
+                "runtime": "dotnet6",
+                "payload": {},
+                "environmentVariables": {
+                    "EnvironmentName": "test1"
+                }
+            },
+            "aws": {
+                "region": "eu-west-1",
+                // "credentials":"profile:tive"
+            }
+        },
+        {
+            "name": "Sam put kinesis record",
+            "type": "aws-sam",
+            "request": "direct-invoke",
+            "invokeTarget": {
+                "target": "code",
+                "projectRoot": "${workspaceFolder}/src/KinesisTestConsumer",
+                "lambdaHandler": "KinesisTestConsumer::KinesisTestConsumer.Function::PutKinesisRecord"
+            },
+            "lambda": {
+                "runtime": "dotnet6",
+                "payload": {},
+                "environmentVariables": {
+                    "EnvironmentName": "test1"
+                }
+            },
+            "aws": {
+                "region": "eu-west-1",
+                // "credentials":"profile:tive"
+            }
+        },
+        {
+            "name": ".NET Core Launch (console)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/bin/Debug/net6.0/HelloWorld.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach"
+        }
+    ]
+}

@@ -1,0 +1,73 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Sample SAM Template for kinesis-consumer function
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 10
+
+Resources:
+  KinesisTestConsumerFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: ./src/KinesisTestConsumer/
+      Handler: KinesisTestConsumer::KinesisTestConsumer.Function::HandleKinesisRecord
+      Runtime: dotnet6
+      Architectures:
+        - arm64
+      MemorySize: 256
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          TABLE_NAME: !Ref RecordsTable
+      Policies:
+      - AmazonSQSFullAccess
+      - AmazonDynamoDBFullAccess
+      Events:
+        Stream:
+          Type: Kinesis
+          Properties:
+            # Stream: arn:aws:kinesis:eu-west-1:836093018746:stream/lambda-stream
+            # Stream: arn:aws:kinesis:eu-west-1:836093018746:stream/lambda-stream
+            Stream: !GetAtt Stream.Arn
+            # StartingPosition: LATEST
+            BisectBatchOnFunctionError: False
+            StartingPosition: LATEST #TRIM_HORIZON
+            BatchSize: 25
+            MaximumBatchingWindowInSeconds: 10
+            MaximumRetryAttempts: 1
+            DestinationConfig:
+               OnFailure: 
+                Destination: !GetAtt KinesisTestConsumerDeadLetter.Arn
+  RecordsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Records
+      AttributeDefinitions: 
+        - AttributeName: Id
+          AttributeType: S
+      KeySchema: 
+        - AttributeName: Id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      ProvisionedThroughput:
+        ReadCapacityUnits: 0
+        WriteCapacityUnits: 0
+  Stream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      ShardCount: 3
+      Name: kinesis-stream
+      StreamModeDetails:
+        StreamMode: PROVISIONED #ON_DEMAND #PROVISIONED
+  KinesisTestConsumerDeadLetter:
+    Type: AWS::SQS::Queue
+
+Outputs:
+  FunctionName:
+    Description: "Kinesis Test Consumer Function"
+    Value: !Ref KinesisTestConsumerFunction
+  StreamARN:
+    Description: "Stream ARN"
+    Value: !GetAtt Stream.Arn
