@@ -29,6 +29,30 @@
             }
         },
         {
+            "name": "Sam consume",
+            "type": "aws-sam",
+            "request": "direct-invoke",
+            "invokeTarget": {
+                "architecture": "arm64",
+                "target": "code",
+                "projectRoot": "${workspaceFolder}/src/KinesisTestConsumer",
+                "lambdaHandler": "KinesisTestConsumer::KinesisTestConsumer.Function::Consume"
+            },
+            "lambda": {
+                "runtime": "dotnet6",
+                "payload": {},
+                "timeoutSec":30,
+                "environmentVariables": {
+                    "EnvironmentName": "test1"
+                }
+            },
+            "aws": {
+                "region": "us-east-1",
+                "credentials":"profile:tive-test"
+                // "credentials":"profile:tive"
+            }
+        },
+        {
             "name": "Sam put",
             "type": "aws-sam",
             "request": "direct-invoke",
@@ -49,27 +73,7 @@
                 "credentials":"profile:default"
             }
         },
-        {
-            "name": "Sam consume",
-            "type": "aws-sam",
-            "request": "direct-invoke",
-            "invokeTarget": {
-                "target": "code",
-                "projectRoot": "${workspaceFolder}/src/KinesisTestConsumer",
-                "lambdaHandler": "KinesisTestConsumer::KinesisTestConsumer.Function::Consume"
-            },
-            "lambda": {
-                "runtime": "dotnet6",
-                "payload": {},
-                "environmentVariables": {
-                    "EnvironmentName": "test1"
-                }
-            },
-            "aws": {
-                "region": "eu-west-1",
-                // "credentials":"profile:tive"
-            }
-        },
+        
         {
             "name": "Sam put kinesis record",
             "type": "aws-sam",

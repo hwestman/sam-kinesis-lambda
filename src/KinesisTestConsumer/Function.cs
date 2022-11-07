@@ -20,7 +20,7 @@ using System.ComponentModel.Design;
 //   --stream-name kinesis-stream \
 //   --cli-binary-format raw-in-base64-out \
 //   --data '{"key":"user1", "score": 100}' \
-//   --partition-key 1 
+//   --partition-key 1
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 //[assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -85,12 +85,11 @@ namespace KinesisTestConsumer
                 Console.WriteLine(JsonSerializer.Serialize(recordItem));
 
             }
-            Thread.Sleep(new Random().Next(3000,3500));
             Console.WriteLine("---------------------- Stream processing complete ---------------------->>>");
         }
         public void WriteToDynamo(Record record){
             var batch = _dbContext.CreateBatchWrite<Record>();
-                
+
             batch.AddPutItem(record);
             Console.WriteLine("Writing to dynamo");
             try
@@ -107,7 +106,7 @@ namespace KinesisTestConsumer
 
 
         public void PutKinesisRecord(){
-            
+
             _client = new AmazonKinesisClient(region);
             var key = Guid.NewGuid();
             for (int i = 0; i <= 20000; i++)
@@ -142,21 +141,13 @@ namespace KinesisTestConsumer
                     }
                     catch (System.Exception ex)
                     {
-                        
                         throw;
                     }
 
                     //show shard ID and sequence number to user
-                    
                 }
-                
             }
-            
-            
         }
-
-
-
         private string GetRecordContents(KinesisEvent.Record streamRecord)
         {
             using (var reader = new StreamReader(streamRecord.Data, Encoding.ASCII))
@@ -164,7 +155,6 @@ namespace KinesisTestConsumer
                 return reader.ReadToEnd();
             }
         }
-        
         protected async Task<APIGatewayProxyResponse> FunctionHandler(APIGatewayProxyRequest apigProxyEvent, ILambdaContext context)
         {
             _client = new AmazonKinesisClient(region);
@@ -196,7 +186,7 @@ namespace KinesisTestConsumer
         private static async Task Consume()
         {
 
-            var stream_name = "kinesis-stream";
+            var stream_name = "test3-raw-data-stream";
             region = RegionEndpoint.USEast1;
             
             // Get iterator for shard
@@ -213,8 +203,9 @@ namespace KinesisTestConsumer
             var iteratorRequest = new GetShardIteratorRequest()
             {
                 StreamName = stream_name,
-                ShardId = shard,
-                ShardIteratorType = Amazon.Kinesis.ShardIteratorType.TRIM_HORIZON
+                ShardId = "shardId-000000000001",
+                ShardIteratorType = Amazon.Kinesis.ShardIteratorType.AT_SEQUENCE_NUMBER,
+                StartingSequenceNumber = "49632636488694868357138058361398380407591296533371289602"
             };
 
             // Retrieve and display records for shard
@@ -225,7 +216,7 @@ namespace KinesisTestConsumer
             }
             catch (System.Exception)
             {
-                
+
                 throw;
             }
             Console.WriteLine("here");
@@ -256,7 +247,7 @@ namespace KinesisTestConsumer
                     // }
                 }
                 iterator = getResponse.NextShardIterator;
-                Thread.Sleep(100);
+                Thread.Sleep(1000);
             }
         }
     }
